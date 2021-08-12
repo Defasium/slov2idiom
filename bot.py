@@ -32,7 +32,7 @@ def start(message):
 
 
 @bot.message_handler(func=lambda _: True, content_types=['text'])
-def echo(message):
+def recommend(message):
     try:
         results = search_idiom(message.text)
         bot.reply_to(message, construct_table(results), parse_mode='Markdown')
@@ -40,7 +40,18 @@ def echo(message):
     except Exception as e:
         print(e)
     bot.reply_to(message, message.text)
-    #bot.reply_to(message, '\n'.join([str(i+1)+'. '+' | '.join(res) for res in enumerate(results)]))
+
+
+@bot.inline_handler(func=lambda query: len(query.query) > 4)
+def query_text(query):
+    results = search_idiom(query.query)
+    answers = []
+    for i, res in enumerate(results):
+        answers.append(types.InlineQueryResultArticle(id=str(i+1), title=res[0].upper(),
+                                               description=res[1].lower(),
+                                               input_message_content=types.InputTextMessageContent(
+                                               message_text=res[0].lower()))
+    bot.answer_inline_query(query.id, answers, cache_time=2147483646) # 68 лет 
 
 
 '''CLICKED_BY = []
