@@ -24,7 +24,7 @@ def start(message):
 
 @bot.message_handler(commands=['help'])
 def help(message):
-    bot.reply_to(message, 'Type your query and I will find idioms'))
+    bot.reply_to(message, 'Type your query and I will find idioms')
 
 
 @bot.message_handler(func=lambda m: not m.text.startswith('/'), content_types=['text'])
