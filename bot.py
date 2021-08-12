@@ -50,7 +50,7 @@ def query_text(query):
         answers.append(types.InlineQueryResultArticle(id=str(i+1), title=res[0].upper(),
                                                description=res[1].lower(),
                                                input_message_content=types.InputTextMessageContent(
-                                               message_text=res[0].lower()))
+                                               message_text=res[0].lower())))
     bot.answer_inline_query(query.id, answers, cache_time=2147483646) # 68 лет 
 
 
