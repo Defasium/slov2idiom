@@ -31,7 +31,7 @@ def start(message):
     bot.reply_to(message, ''.join(['Hello, ', message.from_user.first_name]))
 
 
-@bot.message_handler(func=lambda _: True, content_types=['text'])
+@bot.message_handler(func=lambda m: not m.text.startswith('/'), content_types=['text'])
 def recommend(message):
     try:
         results = search_idiom(message.text)
