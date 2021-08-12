@@ -16,6 +16,10 @@ from telebot import types
 from search import search_idiom, construct_table
 from flask import Flask, request
 
+TOKEN = os.environ.get('TG_TOKEN', '')
+APP_URL = os.path.join(os.environ.get('APP_URL', ''), TOKEN)
+bot = telebot.TeleBot(TOKEN)
+server = Flask(__name__)
 
 @bot.message_handler(commands=['start'])
 def start(message):
@@ -66,8 +70,4 @@ def webhook():
 
 
 if __name__=='__main__':
-    TOKEN = os.environ.get('TG_TOKEN', '')
-    APP_URL = os.path.join(os.environ.get('APP_URL', ''), TOKEN)
-    bot = telebot.TeleBot(TOKEN)
-    server = Flask(__name__)
     server.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
