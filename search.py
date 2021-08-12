@@ -34,10 +34,10 @@ def search_idiom(prompt, num=10):
 
 
 def construct_table(rows):
-    result = ['<pre>', '|№|Идиома|Значение|\n|:---|:---|:----|\n']
+    result = []
     for i, row in enumerate(rows):
-        result.append('|%d|%s|%s|\n'%(i+1, *row))
-    return ''.join(result+['</pre>'])
+        result.append('%d. *%s* | %s\n'%(i+1, *row))
+    return ''.join(result)
 
 
 ######################################################################

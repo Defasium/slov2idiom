@@ -35,7 +35,7 @@ def start(message):
 def echo(message):
     try:
         results = search_idiom(message.text)
-        bot.reply_to(message, construct_table(results), parse_mode='HTML')
+        bot.reply_to(message, construct_table(results), parse_mode='Markdown')
         return
     except Exception as e:
         print(e)
