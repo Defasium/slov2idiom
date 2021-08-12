@@ -4,6 +4,9 @@ Try it yourself in tg: @rudiombot
 
 How it works:
 
+<p align='center'><img src="example.gif" alt="bert"  width="300"/></p>
+
+
 ## Model architecture
 First of all, we need to choose the best model for calculating semantic similarity.
 We can consider BERT architectures. There are two popular approaches, the steady but accurate one and the production-friendly.
