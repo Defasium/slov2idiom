@@ -29,7 +29,7 @@ def start(message):
     bot.reply_to(message, ''.join(['Hello, ', message.from_user.first_name]))
 
 
-@bot.message_handler(func=lambda _: True, content_type=['text'])
+@bot.message_handler(func=lambda _: True, content_types=['text'])
 def echo(message):
     bot.reply_to(message, message.text)
 
