@@ -14,7 +14,7 @@ def tokenize_sentence_sp(sentence: str):
     tokens = [i for i in tokens
               if i not in punctuation]
     tokens = ' '.join(tokens)
-    return sp.id_to_piece(SP.tokenize(tokens))
+    return SP.id_to_piece(SP.tokenize(tokens))
 
 
 def svdmap(prompt):
