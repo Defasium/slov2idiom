@@ -17,7 +17,7 @@ bot.
 import os
 import telebot
 from telebot import types
-from search import search_idiom
+from search import search_idiom, construct_table
 from flask import Flask, request
 
 TOKEN = os.environ.get('TG_TOKEN', '')
@@ -35,8 +35,7 @@ def start(message):
 def echo(message):
     try:
         results = search_idiom(message.text)
-        bot.reply_to(message, '\n'.join([str(i+1)+'. '+' | '.join(res)
-                                         for i, res in enumerate(results)]))
+        bot.reply_to(message, construct_table(results), parse_mode='Markdown')
         return
     except Exception as e:
         print(e)

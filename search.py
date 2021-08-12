@@ -1,12 +1,13 @@
-import pickle
+from functools import lru_cache
 import os
 import re
 from annoy import AnnoyIndex
 import numpy as np
-from numpy import diag, sqrt, array
+from numpy import diag, sqrt, array, float64
 import sentencepiece as spm
 from string import punctuation
 import joblib
+
 
 
 def tokenize_sentence_sp(sentence: str):
@@ -17,6 +18,7 @@ def tokenize_sentence_sp(sentence: str):
     return SP.id_to_piece(SP.tokenize(tokens))
 
 
+@lru_cache(maxsize=100)
 def svdmap(prompt):
     ts = tokenize_sentence_sp(prompt.lower().strip())
     t_idx = [VOCAB.get(t, NON_REC) for t in ts]
@@ -25,9 +27,17 @@ def svdmap(prompt):
     return ((t_idf.dot(U_RANK[t_idx])).dot(diag(S_RANK)).dot(VH_RANK) + BIAS).dot(INVERSE)
 
 
+@lru_cache(maxsize=100)
 def search_idiom(prompt, num=10):
     idx, dist = UU.get_nns_by_vector(svdmap(prompt), num, include_distances=True)
     return DB[idx]
+
+
+def construct_table(rows):
+    result = ['|№|Идиома|Значение|\n|:---|:---|:----|\n']
+    for i, row in enumerate(rows):
+        result.append('|%d|%s|%s|\n'%(i+1, *row))
+    return ''.join(result)
 
 
 ######################################################################
@@ -39,13 +49,13 @@ UU.load('data/LaBse_CUT_1k.ann') # super fast, will just mmap the file
 
 MODEL = joblib.load('data/svd.gz')
 VOCAB = MODEL['map']
-IDF = MODEL['idf']
+IDF = float64(MODEL['idf'])
 NON_REC = VOCAB['<unk>']
-U_RANK = MODEL['u_rank']
-S_RANK = MODEL['s_rank']
-VH_RANK = MODEL['vh_rank']
-BIAS = MODEL['bias']
-INVERSE = MODEL['inverse']
+U_RANK = float64(MODEL['u_rank'])
+S_RANK = float64(MODEL['s_rank'])
+VH_RANK = float64(MODEL['vh_rank'])
+BIAS = float64(MODEL['bias'])
+INVERSE = float64(MODEL['inverse'])
 
 DB = []
 with open('data/db.txt', 'r', encoding='utf-8') as f:
