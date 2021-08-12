@@ -34,10 +34,11 @@ def start(message):
 @bot.message_handler(func=lambda _: True, content_types=['text'])
 def echo(message):
     results = search_idiom(message.text)
+    print(message.text, results)
     bot.reply_to(message, '\n'.join([str(i+1)+'. '+' | '.join(res) for res in enumerate(results)]))
 
 
-CLICKED_BY = []
+'''CLICKED_BY = []
 
 #Handler for command: '/btn_test'
 @bot.message_handler(commands=['btn_test'])
@@ -68,7 +69,7 @@ def command_click_inline(call):
         bot.edit_message_text("<b>Hey friend...</b>", cid, mid, reply_markup=click_kb_edited, parse_mode="HTML")
         bot.answer_callback_query(call.id, text="Thanks for click me {}.".format(call.from_user.first_name))
     else:
-        bot.answer_callback_query(call.id, text="You already clicked this button!")
+        bot.answer_callback_query(call.id, text="You already clicked this button!")'''
 
 
 @server.route('/' + TOKEN, methods=['POST'])
