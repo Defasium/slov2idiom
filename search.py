@@ -50,5 +50,5 @@ INVERSE = MODEL['inverse']
 DB = []
 with open('data/db.txt', 'r', encoding='utf-8') as f:
     for line in f:
-       DB.append(line.split('\t'))
+       DB.append(line.strip().split('\t'))
 DB = array(DB)

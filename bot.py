@@ -35,7 +35,8 @@ def start(message):
 def echo(message):
     try:
         results = search_idiom(message.text)
-        print(message.text, results)
+        bot.reply_to(message, '\n'.join([str(i+1)+'. '+' | '.join(res) for res in enumerate(results)]))
+        return
     except Exception as e:
         print(e)
     bot.reply_to(message, message.text)
