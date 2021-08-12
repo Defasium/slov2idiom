@@ -33,9 +33,10 @@ def start(message):
 
 @bot.message_handler(func=lambda _: True, content_types=['text'])
 def echo(message):
-    results = search_idiom(message.text)
-    print(message.text, results)
-    bot.reply_to(message, '\n'.join([str(i+1)+'. '+' | '.join(res) for res in enumerate(results)]))
+    #results = search_idiom(message.text)
+    #print(message.text, results)
+    bot.reply_to(message, message.text)
+    #bot.reply_to(message, '\n'.join([str(i+1)+'. '+' | '.join(res) for res in enumerate(results)]))
 
 
 '''CLICKED_BY = []
