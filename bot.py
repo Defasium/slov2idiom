@@ -17,6 +17,7 @@ bot.
 import os
 import telebot
 from telebot import types
+from search import search_idiom
 from flask import Flask, request
 
 TOKEN = os.environ.get('TG_TOKEN', '')
@@ -30,9 +31,10 @@ def start(message):
     bot.reply_to(message, ''.join(['Hello, ', message.from_user.first_name]))
 
 
-#@bot.message_handler(func=lambda _: True, content_types=['text'])
-#def echo(message):
-#    bot.reply_to(message, message.text)
+@bot.message_handler(func=lambda _: True, content_types=['text'])
+def echo(message):
+	results = search_idiom(message.text)
+    bot.reply_to(message, '\n'.join([str(i+1)+'. '+' | '.join(res) for res in enumerate(results)]))
 
 
 CLICKED_BY = []

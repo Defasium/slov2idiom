@@ -1,2 +1,6 @@
 pyTelegramBotAPI==3.8.2
 Flask==2.0.1
+annoy==1.16.3
+sentencepiece==0.1.96
+numpy==1.18.0
+joblib==1.0.1
