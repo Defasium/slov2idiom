@@ -13,7 +13,7 @@ We can consider BERT architectures. There are two popular approaches, the steady
 First one is sentence-pair encoding:
 <p align='center'><img src="https://www.researchgate.net/publication/334783045/figure/fig2/AS:786570592391170@1564544451786/BERT-sentence-pair-encoding.ppm" alt="bert"  width="300"/></p>
 
-Here to sentences are encoding simultaneously. This means that in order to find similar sentences we have to compute every new prompt with our dataset. That is a huge drawback of such architecture.
+Here two sentences are encoding simultaneously. This means that in order to find similar sentences we have to compute every new prompt with our dataset. It is a huge drawback of such architecture.
 
 Second one is based on siamese-networks and metric learning:
 
@@ -25,7 +25,7 @@ To calculate semantic similarity between two sentences we can simply calculate c
 So the second approach is more preferable
 
 ## STSb comparison
-We tested accuracies of some pre-trained Russian BERT models on **STSb benchmark**. We calculate cosine similarities between normalized embeddings (from the class token (CLS) or by averaging encoded tokens (MEANS)):
+We tested accuracies of some pre-trained Russian BERT models on **STSb benchmark**. We calculate cosine similarities between normalized embeddings (from the class token (CLS) or by averaging encoded tokens (MEAN)):
 
 |MODEL|PARAMS|EMBEDDING SIZE|POOLING TYPE|TRAIN SPEARMAN CORR|TEST SPEARMAN CORR|
 |:---:|:---:|:---:|:---:|:---:|:---:|
@@ -39,7 +39,7 @@ We tested accuracies of some pre-trained Russian BERT models on **STSb benchmark
 |[cointegrated/LaBSE-en-ru](https://huggingface.co/cointegrated/LaBSE-en-ru)|127M|768|MEAN| **0.754444** | **0.754402** |
 
 
-In an ideal scenario, we would like to use a model with a minimum number of parameters and with high accuracy. However, even if we finetune **rubert-tiny** on STSb dataset we would get at best only 66% spearman rank correlation.
+In an ideal case scenario, we would like to use a model with a minimum number of parameters and with high accuracy. However, even if we finetune **rubert-tiny** on STSb dataset we would get at best only 66% spearman rank correlation.
 
 ## Feature selection
 At the same time, we would like to use smaller embeddings due to the curse of dimensionality when searching among our embeddings.
@@ -55,7 +55,13 @@ Here are the dependency between Spearman correlation on train set and top-N feat
 
 <p align='center'><img src='https://user-images.githubusercontent.com/47502256/129255306-fd38fd85-32ae-4955-a14e-c04d1067ad3b.png' alt="feature selection" width="400"/></p>
 
-As you can see from the figure we can achieve a **2.5%** boost in performance simply by using a subset of 125 features.
+**You can find the full example here:**
+
+Google Colab: [URL1](https://colab.research.google.com/drive/1e0hZhAHy408VZAqTDKT2Y0_eHB41sYA6?usp=sharing) 
+
+Github Gist: [URL2](https://gist.github.com/Defasium/e28dc5b1dfde8eab1dd5aa45fd7bb208)
+
+As you can see from the above figure we can achieve a **2.5%** boost in performance simply by using a subset of 125 features.
 
 ## BERT's embeddings approximation
 The smallest model (rubert-tiny) perform around 6-10 ms on the CPU. LaBse performs 80-100 ms. Instead of calculating embeddings, we can simply approximate it via some classical ml approaches - TF-IDF. 
@@ -64,7 +70,8 @@ The cons of this algorithm:
  * better handles OOV (out-of-vocabulary) cases and is used in all BERT and GPT architectures by default.
  * smaller vocab size => smaller TfIdf vectors
  * may be faster than lemmatization and don't rely on memory-consuming dictionaries
-Finally, we can include a special <UNK> token in vocab, otherwise, we will lose information
+
+Finally, we can include a special < UNK > token in vocab, otherwise, we will lose information
 
 We can use simple linear regression as a universal approximator trained to predict from given TfIdf vector a BERT's embedding.
 To achieve better results instead of fitting to highly-correlated embeddings we can predict PCA and then transform it to original embeddings space.
@@ -74,7 +81,7 @@ So the final architecture can be illustrated as following:
 
 Grey-colored nodes indicate that weights of PCA are not updating during training.
 
-We can also 'contaminate' our training data by purposely dropping some tokens at random or replacing by unknown ones - '<UNK>'. Such an approach provides better results on the fitted model compared to LaBse embeddings:
+We can also 'contaminate' our training data by purposely dropping some tokens at random or replacing by unknown ones - '< UNK >'. Such an approach provides better results on the fitted model compared to LaBse embeddings:
   
 |MODEL|Params|P@1|P@3|P@5|P@10|Speed|
 |:---:|:---:|:---:|:---:|:---:|:---:|:---:|
