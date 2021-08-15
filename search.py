@@ -92,7 +92,7 @@ def construct_table(rows):
 
 
 def construct_idiom_info(row):
-    return '*%s*\n\t%s'%(row[0].upper(), row[1])
+    return '*%s*\n\t\t%s'%(row[0].upper(), row[1])
 
 
 HASHMAP = {make_one_hash(i):i for i in range(DB.shape[0])}

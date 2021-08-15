@@ -32,7 +32,7 @@ def start(message):
 @bot.message_handler(commands=['help'])
 def help(message):
     bot.reply_to(message,
-                 'Введи запрос и я найду идиомы.\n'
+                 'Введи запрос и я найду тебе похожие по смыслу идиомы.\n'
                  '[*Больше информации тут*](github.com/Defasium/slov2idiom)',
                  parse_mode='Markdown')
 
@@ -47,12 +47,17 @@ def construct_keyboard(results, idx, undo=None):
     keyboard = types.InlineKeyboardMarkup()
     if undo is not None:
         callback_data = update_history(undo)
-        get_back_btn = types.InlineKeyboardButton(text="◀ Назад", callback_data=callback_data)
+        get_back_btn = types.InlineKeyboardButton(text='◀ назад'.upper(), callback_data=callback_data)
         keyboard.add(get_back_btn)
     for i, res in zip(idx, results):
         keyboard.add(types.InlineKeyboardButton(text=res[0].upper(), callback_data=str(i)))
-    keyboard.add(types.InlineKeyboardButton(text='🎲 Случайная идиома', callback_data=make_random_hash()))
+    keyboard.add(generate_random_btn())
     return keyboard
+
+
+def generate_random_btn():
+    return types.InlineKeyboardButton(text='🎲 случайная идиома'.upper(),
+                                      callback_data=make_random_hash()))
         
 
 @bot.message_handler(func=lambda m: not m.text.startswith('/'), content_types=['text'])
@@ -61,11 +66,10 @@ def recommend(message):
         results, idx = search_idiom(message.text, return_index=True)
         HISTORY[str(message.chat.id)] = results, idx
         bot.reply_to(message, construct_table(results), parse_mode='Markdown',
-                     reply_markup=construct_keyboard([('🔎 Поиск по идиомам',)], ['search']))
-        return
+                     reply_markup=construct_keyboard([('🔎 поиск по идиомам',)], ['search']))
     except Exception as e:
         print(e)
-    bot.reply_to(message, 'Ошибка')
+        bot.reply_to(message, 'Ошибка')
 
 
 @bot.inline_handler(func=lambda query: len(query.query) > 4)
@@ -87,6 +91,8 @@ def callback_message(call):
         if mdhash in HISTORY:
             restored_data = HISTORY[mdhash]
             reply_markup = types.InlineKeyboardMarkup.de_json(restored_data[0])
+            reply_markup.keyboard[0] = reply_markup.keyboard[0][:-1]
+            reply_markup.add(generate_random_btn())
             text = restored_data[-1]
         else:
             reply_markup = None
