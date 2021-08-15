@@ -9,6 +9,30 @@ import sentencepiece as spm
 from string import punctuation
 import joblib
 
+######################################################################
+################# SOME GLOBAL VARIABLES ##############################
+######################################################################
+SALT = os.environ.get('SALT', '-')
+SP = spm.SentencePieceProcessor(model_file='data/m.model')
+UU = AnnoyIndex(125, 'angular')
+UU.load('data/LaBse_CUT_1k.ann') # super fast, will just mmap the file
+
+MODEL = joblib.load('data/svd.gz')
+VOCAB = MODEL['map']
+IDF = float64(MODEL['idf'])
+NON_REC = VOCAB['<unk>']
+U_RANK = float64(MODEL['u_rank'])
+S_RANK = float64(MODEL['s_rank'])
+VH_RANK = float64(MODEL['vh_rank'])
+BIAS = float64(MODEL['bias'])
+INVERSE = float64(MODEL['inverse'])
+
+DB = []
+with open('data/db.txt', 'r', encoding='utf-8') as f:
+    for line in f:
+       DB.append(line.strip().split('\t'))
+DB = array(DB)
+######################################################################
 
 
 def tokenize_sentence_sp(sentence: str):
@@ -50,26 +74,3 @@ def construct_table(rows):
     for i, row in enumerate(rows):
         result.append('%d. *%s* — %s\n'%(i+1, row[0].upper(), row[1]))
     return ''.join(result)
-######################################################################
-################# SOME GLOBAL VARIABLES ##############################
-######################################################################
-SALT = os.environ.get('SALT', '-')
-SP = spm.SentencePieceProcessor(model_file='data/m.model')
-UU = AnnoyIndex(125, 'angular')
-UU.load('data/LaBse_CUT_1k.ann') # super fast, will just mmap the file
-
-MODEL = joblib.load('data/svd.gz')
-VOCAB = MODEL['map']
-IDF = float64(MODEL['idf'])
-NON_REC = VOCAB['<unk>']
-U_RANK = float64(MODEL['u_rank'])
-S_RANK = float64(MODEL['s_rank'])
-VH_RANK = float64(MODEL['vh_rank'])
-BIAS = float64(MODEL['bias'])
-INVERSE = float64(MODEL['inverse'])
-
-DB = []
-with open('data/db.txt', 'r', encoding='utf-8') as f:
-    for line in f:
-       DB.append(line.strip().split('\t'))
-DB = array(DB)
