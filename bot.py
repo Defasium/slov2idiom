@@ -62,7 +62,7 @@ def recommend(message):
     try:
         results, idx = search_idiom(message.text, return_index=True)
         bot.reply_to(message, construct_table(results), parse_mode='Markdown',
-                     reply_markup=construct_keyboard(resutls, idx))
+                     reply_markup=construct_keyboard(results, idx))
         return
     except Exception as e:
         print(e)
