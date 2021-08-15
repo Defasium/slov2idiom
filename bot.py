@@ -46,7 +46,7 @@ def recommend(message):
     keyboard = types.InlineKeyboardMarkup()
     callback_btn = types.InlineKeyboardButton(text="Нажми меня", callback_data="test")
     keyboard.add(callback_btn)
-    keyboard.add(types.InlineKeyboardButton(text="Назад", callback_data=keyboard))
+    keyboard.add(types.InlineKeyboardButton(text="Назад", callback_data=keyboard.to_json()))
     try:
         results, idx = search_idiom(message.text, return_index=True)
         for i, res in zip(idx, results):
