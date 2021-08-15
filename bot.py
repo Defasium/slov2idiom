@@ -57,7 +57,7 @@ def construct_keyboard(results, idx, undo=None):
 
 def generate_random_btn():
     return types.InlineKeyboardButton(text='🎲 случайная идиома'.upper(),
-                                      callback_data=make_random_hash()))
+                                      callback_data=make_random_hash())
         
 
 @bot.message_handler(func=lambda m: not m.text.startswith('/'), content_types=['text'])
