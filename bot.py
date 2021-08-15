@@ -13,7 +13,8 @@ Then, the bot is started and runs until we press Ctrl-C on the command line.
 import os
 import telebot
 from telebot import types
-from search import search_idiom, construct_table, construct_idiom_info, make_one_hash, find_nn_by_hash
+from search import search_idiom, find_nn_by_hash, construct_table, construct_idiom_info, \
+                   make_one_hash, make_random_hash
 from flask import Flask, request
 
 TOKEN = os.environ.get('TG_TOKEN', '')
@@ -50,6 +51,7 @@ def construct_keyboard(results, idx, undo=None):
         keyboard.add(get_back_btn)
     for i, res in zip(idx, results):
         keyboard.add(types.InlineKeyboardButton(text=res[0].upper(), callback_data=str(i)))
+    keyboard.add(types.InlineKeyboardButton(text='🎲 Случайная идиома', callback_data=make_random_hash()))
     return keyboard
         
 
@@ -59,7 +61,7 @@ def recommend(message):
         results, idx = search_idiom(message.text, return_index=True)
         HISTORY[str(message.chat.id)] = results, idx
         bot.reply_to(message, construct_table(results), parse_mode='Markdown',
-                     reply_markup=construct_keyboard(['🆕 Поиск по идиомам'], ['search']))
+                     reply_markup=construct_keyboard([('🔎 Поиск по идиомам',)], ['search']))
         return
     except Exception as e:
         print(e)
@@ -95,11 +97,13 @@ def callback_message(call):
         restored_data = HISTORY.get(str(call.message.chat.id), None)
         if (mdhash == 'search') and (restored_data is not None):
             results, idx = restored_data
+            text = '*Поиск похожих идиом*🔎'
         else:
             results, idx = find_nn_by_hash(mdhash, return_index=True)
+            text = construct_idiom_info(results[0])
+            results, idx = results[1:], idx[1:]
         undo = (call.message.reply_markup.to_json(), call.message.text)
-        reply_markup = construct_keyboard(results[1:], idx[1:], undo=undo)
-        text = construct_idiom_info(results[0])
+        reply_markup = construct_keyboard(results, idx, undo=undo)
     try:
         bot.edit_message_text(chat_id=call.message.chat.id,
                               message_id=call.message.message_id,

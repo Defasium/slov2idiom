@@ -5,6 +5,7 @@ import re
 from annoy import AnnoyIndex
 import numpy as np
 from numpy import diag, sqrt, array, float64
+from numpy.random import randint
 import sentencepiece as spm
 from string import punctuation
 import joblib
@@ -32,6 +33,8 @@ with open('data/db.txt', 'r', encoding='utf-8') as f:
     for line in f:
        DB.append(line.strip().split('\t'))
 DB = array(DB)
+
+EMOJITABLE = ('1️⃣','2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟')
 ######################################################################
 
 
@@ -69,6 +72,10 @@ def make_one_hash(elem, salt=SALT):
     return md5(''.join((str(elem), salt)).encode('utf-8')).hexdigest()
 
 
+def make_random_hash():
+    return make_one_hash(randint(DB.shape[0]))
+
+
 @lru_cache(maxsize=100)
 def find_nn_by_hash(mdhash, num=6, return_index=False):
     idx, dist = UU.get_nns_by_item(HASHMAP.get(mdhash, 0), num, include_distances=True)
@@ -80,12 +87,12 @@ def find_nn_by_hash(mdhash, num=6, return_index=False):
 def construct_table(rows):
     result = []
     for i, row in enumerate(rows):
-        result.append('%d. *%s* — %s\n'%(i+1, row[0].upper(), row[1]))
+        result.append('%s *%s* — %s\n'%(EMOJITABLE[i], row[0].upper(), row[1]))
     return ''.join(result)
 
 
 def construct_idiom_info(row):
-	return '*%s*\n\t%s'%(row[0].upper(), row[1])
+    return '*%s*\n\t%s'%(row[0].upper(), row[1])
 
 
 HASHMAP = {make_one_hash(i):i for i in range(DB.shape[0])}
