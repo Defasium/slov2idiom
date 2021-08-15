@@ -76,6 +76,7 @@ def callback_message(call):
         try:
             print(call.message.reply_markup)
             bot.edit_message_text(chat_id=call.message.chat.id,
+                                  reply_markup=call.message.reply_markup,
                                   message_id=call.message.message_id, text="Пыщь")
         except Exception as e:
             print(e)

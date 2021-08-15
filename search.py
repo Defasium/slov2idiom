@@ -1,4 +1,5 @@
 from functools import lru_cache
+from hashlib import md5
 import os
 import re
 from annoy import AnnoyIndex
@@ -31,20 +32,28 @@ def svdmap(prompt):
 def search_idiom(prompt, num=10, return_index=False):
     idx, dist = UU.get_nns_by_vector(svdmap(prompt), num, include_distances=True)
     if return_index:
-        return DB[idx], idx
+        return DB[idx], make_hash_with(idx, SALT)
     return DB[idx]
+
+
+def make_hash_with(indices, salt)
+    return [make_one_hash(index, salt) for index in indices]
+
+
+@lru_cache(maxsize=1000)
+def make_one_hash(elem, salt):
+    return md5(''.join((str(elem), salt)).encode('utf-8')).hexdigest()
 
 
 def construct_table(rows):
     result = []
     for i, row in enumerate(rows):
-        result.append('%d. *%s* | %s\n'%(i+1, row[0].upper(), row[1]))
+        result.append('%d. *%s* — %s\n'%(i+1, row[0].upper(), row[1]))
     return ''.join(result)
-
-
 ######################################################################
 ################# SOME GLOBAL VARIABLES ##############################
 ######################################################################
+SALT = os.environ.get('SALT', '-')
 SP = spm.SentencePieceProcessor(model_file='data/m.model')
 UU = AnnoyIndex(125, 'angular')
 UU.load('data/LaBse_CUT_1k.ann') # super fast, will just mmap the file
