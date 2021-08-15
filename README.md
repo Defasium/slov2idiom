@@ -4,7 +4,21 @@ Try it yourself in tg: @rudiombot
 
 How it works:
 
-<p align='center'><img src="example.gif" alt="bert"  width="300"/></p>
+<p align='center'><img src="https://user-images.githubusercontent.com/47502256/129484805-1bbadfa9-8b11-4834-8d31-0509b1b20268.gif" alt="bert"  width="300"/></p>
+
+TODO list:
+* add support for inline mode✅
+* add dynamically changing interface✅
+* add support for random search of idioms✅
+* add history and undo button✅
+* add support for searching similar idioms by clicking on them✅
+* change language interface depending on user's region code ❌
+* calculate other ranking metrics (MAP, NDCG) ❌
+* add Paraphrase+ benchmark ❌
+* add support for emoji in queries ❌
+* add reranking by idiom's popularity ❌
+* add daily limits for users ❌
+* finetune LaBse on STSb and Paraphrase+ to get better embeddings ❌
 
 
 ## Model architecture
@@ -93,12 +107,3 @@ Such great speedup was acquired by reimplementing TFiDF transformation and using
 ## Search engine
 To find similar idioms we utilize [**annoy**](https://github.com/spotify/annoy) library on 125 embedding's subset from LaBse.
 On Intel Xeon 2.3 GHz search with embedding calculation takes around 400 us.
-
-TODO list:
-* calculate other ranking metrics (MAP, NDCG)
-* add support for searching similar idioms by clicking on them
-* add Paraphrase+ benchmark
-* add support for emoji in queries
-* add reranking by idiom's popularity
-* add daily limits for users
-* finetune LaBse on STSb and Paraphrase+ to get better embeddings
