@@ -22,36 +22,32 @@ bot = telebot.TeleBot(TOKEN)
 server = Flask(__name__)
 HISTORY = {}
 
+
 @bot.message_handler(commands=['start'])
 def start(message):
-    bot.reply_to(message, ''.join(['Hello, ', message.from_user.first_name]))
+    bot.reply_to(message, ''.join(['👋, ', message.from_user.first_name]))
 
 
 @bot.message_handler(commands=['help'])
 def help(message):
-    bot.reply_to(message, 'Type your query and I will find idioms')
+    bot.reply_to(message,
+                 'Введи запрос и я найду идиомы.\n'
+                 '[*Больше информации тут*](github.com/Defasium/slov2idiom)',
+                 parse_mode='Markdown')
 
-'''
-@bot.message_handler(func=lambda m: not m.text.startswith('/'), content_types=['text'])
-def recommend(message):
-    try:
-        results = search_idiom(message.text)
-        bot.reply_to(message, construct_table(results), parse_mode='Markdown')
-        return
-    except Exception as e:
-        print(e)
-    bot.reply_to(message, 'Error')
-'''
-def update_history(keyboard):
-    mdhash = make_one_hash(keyboard)
-    HISTORY[mdhash] = keyboard
+
+def update_history(args):
+    mdhash = make_one_hash(args[0])
+    HISTORY[mdhash] = args
     return 'H|'+mdhash
 
 
 def construct_keyboard(results, idx, undo=None):
     keyboard = types.InlineKeyboardMarkup()
     if undo is not None:
-        keyboard.add(types.InlineKeyboardButton(text="◀ Назад", callback_data=update_history(undo.to_json())))
+        callback_data = update_history(undo)
+        get_back_btn = types.InlineKeyboardButton(text="◀ Назад", callback_data=callback_data)
+        keyboard.add(get_back_btn)
     for i, res in zip(idx, results):
         keyboard.add(types.InlineKeyboardButton(text=res[0].upper(), callback_data=str(i)))
     return keyboard
@@ -61,12 +57,13 @@ def construct_keyboard(results, idx, undo=None):
 def recommend(message):
     try:
         results, idx = search_idiom(message.text, return_index=True)
+        HISTORY[str(message.chat.id)] = results, idx
         bot.reply_to(message, construct_table(results), parse_mode='Markdown',
-                     reply_markup=construct_keyboard(results, idx))
+                     reply_markup=construct_keyboard(['🆕 Поиск по идиомам'], ['search']))
         return
     except Exception as e:
         print(e)
-    bot.reply_to(message, 'Error')
+    bot.reply_to(message, 'Ошибка')
 
 
 @bot.inline_handler(func=lambda query: len(query.query) > 4)
@@ -83,43 +80,33 @@ def query_text(query):
 
 @bot.callback_query_handler(func=lambda call: call.message)
 def callback_message(call):
-    print(call.data)
-    if call.data == "test":
-        try:
-            print(call.message.reply_markup)
-            bot.edit_message_text(chat_id=call.message.chat.id,
-                                  reply_markup=call.message.reply_markup,
-                                  message_id=call.message.message_id, text="Пыщь")
-        except Exception as e:
-            print(e)
     if call.data.startswith('H|'):
         mdhash = call.data[2:]
-        try:
-            if mdhash in HISTORY:       
-                keyboard = types.InlineKeyboardMarkup.de_json(HISTORY[mdhash])
-                bot.edit_message_text(chat_id=call.message.chat.id,
-                                      reply_markup=keyboard,
-                                      message_id=call.message.message_id,
-                                      text="Результаты поиска по запросу")
-            else:
-                bot.edit_message_text(chat_id=call.message.chat.id,
-                                      message_id=call.message.message_id,
-                                      text=call.message.text)
-                bot.send_message(chat_id=call.message.chat.id, text='Ошибка! Время истекло')
-        except Exception as e:
-            print(e)
+        if mdhash in HISTORY:
+            restored_data = HISTORY[mdhash]
+            reply_markup = types.InlineKeyboardMarkup.de_json(restored_data[0])
+            text = restored_data[-1]
+        else:
+            reply_markup = None
+            text = call.message.text
+            bot.send_message(chat_id=call.message.chat.id, text='Ошибка! Время истекло')
     else:
         mdhash = call.data
-        print('here')
-        results, idx = find_nn_by_hash(mdhash, return_index=True)
-        print('here2')
-        keyboard = construct_keyboard(results, idx, undo=call.message.reply_markup)
-        print('here3')
+        restored_data = HISTORY.get(str(call.message.chat.id), None)
+        if (mdhash == 'search') and (restored_data is not None):
+            results, idx = restored_data
+        else:
+            results, idx = find_nn_by_hash(mdhash, return_index=True)
+        undo = (call.message.reply_markup.to_json(), call.message.text)
+        reply_markup = construct_keyboard(results[1:], idx[1:], undo=undo)
+        text = construct_idiom_info(results[0])
+    try:
         bot.edit_message_text(chat_id=call.message.chat.id,
                               message_id=call.message.message_id,
-                              text=construct_idiom_info(results[0]),
-                              parse_mode='Markdown', reply_markup=keyboard)
-        print('here4')
+                              text=text, reply_markup=reply_markup,
+                              parse_mode='Markdown')
+    except Exception as e:
+        print(e)
 
 
 @server.route('/' + TOKEN, methods=['POST'])
