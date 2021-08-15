@@ -48,7 +48,7 @@ def update_history(keyboard):
     return 'H|'+mdhash
 
 
-def construct_keyboard(resutls, idx, undo=None):
+def construct_keyboard(results, idx, undo=None):
     keyboard = types.InlineKeyboardMarkup()
     if undo is not None:
         keyboard.add(types.InlineKeyboardButton(text="◀ Назад", callback_data=update_history(undo.to_json())))
