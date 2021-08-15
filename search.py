@@ -41,7 +41,7 @@ def make_hash_with(indices, salt):
 
 
 @lru_cache(maxsize=1000)
-def make_one_hash(elem, salt):
+def make_one_hash(elem, salt=SALT):
     return md5(''.join((str(elem), salt)).encode('utf-8')).hexdigest()
 
 

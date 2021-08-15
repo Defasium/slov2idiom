@@ -13,13 +13,14 @@ Then, the bot is started and runs until we press Ctrl-C on the command line.
 import os
 import telebot
 from telebot import types
-from search import search_idiom, construct_table
+from search import search_idiom, construct_table, make_one_hash
 from flask import Flask, request
 
 TOKEN = os.environ.get('TG_TOKEN', '')
 APP_URL = os.path.join(os.environ.get('APP_URL', ''), TOKEN)
 bot = telebot.TeleBot(TOKEN)
 server = Flask(__name__)
+HISTORY = {}
 
 @bot.message_handler(commands=['start'])
 def start(message):
@@ -41,12 +42,17 @@ def recommend(message):
         print(e)
     bot.reply_to(message, 'Error')
 '''
+def update_history(keyboard):
+    mdhash = make_one_hash(keyboard)
+    HISTORY[mdhash] = keyboard
+    return 'H|'+mdhash
+
 @bot.message_handler(func=lambda m: not m.text.startswith('/'), content_types=['text'])
 def recommend(message):
     keyboard = types.InlineKeyboardMarkup()
     callback_btn = types.InlineKeyboardButton(text="Нажми меня", callback_data="test")
     keyboard.add(callback_btn)
-    keyboard.add(types.InlineKeyboardButton(text="Назад", callback_data=keyboard.to_json()))
+    keyboard.add(types.InlineKeyboardButton(text="Назад", callback_data=update_history(keyboard.to_json())))
     try:
         results, idx = search_idiom(message.text, return_index=True)
         for i, res in zip(idx, results):
@@ -79,6 +85,19 @@ def callback_message(call):
             bot.edit_message_text(chat_id=call.message.chat.id,
                                   reply_markup=call.message.reply_markup,
                                   message_id=call.message.message_id, text="Пыщь")
+        except Exception as e:
+            print(e)
+    if call.data.startswith('H|'):
+        try:
+            if call.data[2:] in HISTORY:       
+                keyboard = types.InlineKeyboardMarkup.de_json(HISTORY[call.data[2:]])
+                bot.edit_message_text(chat_id=call.message.chat.id,
+                                      reply_markup=keyboard,
+                                      message_id=call.message.message_id, text="Пыщь")
+            else:
+                bot.edit_message_text(chat_id=call.message.chat.id,
+                                      message_id=call.message.message_id, text=call.message.text)
+                bot.send_message(chat_id=call.message.chat.id, text='Время истекло')
         except Exception as e:
             print(e)
 
