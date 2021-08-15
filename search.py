@@ -71,7 +71,7 @@ def make_one_hash(elem, salt=SALT):
 
 @lru_cache(maxsize=100)
 def find_nn_by_hash(mdhash, num=6, return_index=False):
-    idx, dist = UU.get_nns_by_index(HASHMAP.get(mdhash, 0), num, include_distances=True)
+    idx, dist = UU.get_nns_by_item(HASHMAP.get(mdhash, 0), num, include_distances=True)
     if return_index:
         return DB[idx], make_hash_with(idx, SALT)
     return DB[idx]
