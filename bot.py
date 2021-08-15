@@ -91,6 +91,7 @@ def callback_message(call):
         if mdhash in HISTORY:
             restored_data = HISTORY[mdhash]
             reply_markup = types.InlineKeyboardMarkup.de_json(restored_data[0])
+            print(reply_markup)
             reply_markup.keyboard[0] = reply_markup.keyboard[0][:-1]
             reply_markup.add(generate_random_btn())
             text = restored_data[-1]
