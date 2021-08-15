@@ -36,7 +36,7 @@ def search_idiom(prompt, num=10, return_index=False):
     return DB[idx]
 
 
-def make_hash_with(indices, salt)
+def make_hash_with(indices, salt):
     return [make_one_hash(index, salt) for index in indices]
 
 
