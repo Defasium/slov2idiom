@@ -110,12 +110,16 @@ def callback_message(call):
             print(e)
     else:
         mdhash = call.data
+        print('here')
         results, idx = find_nn_by_hash(mdhash, return_index=True)
+        print('here2')
         keyboard = construct_keyboard(results, idx, undo=call.message.reply_markup)
+        print('here3')
         bot.edit_message_text(chat_id=call.message.chat.id,
                               message_id=call.message.message_id,
                               text=construct_idiom_info(results[0]),
                               parse_mode='Markdown', reply_markup=keyboard)
+        print('here4')
 
 
 @server.route('/' + TOKEN, methods=['POST'])
