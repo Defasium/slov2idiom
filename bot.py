@@ -30,7 +30,7 @@ def start(message):
 def help(message):
     bot.reply_to(message, 'Type your query and I will find idioms')
 
-
+'''
 @bot.message_handler(func=lambda m: not m.text.startswith('/'), content_types=['text'])
 def recommend(message):
     try:
@@ -39,7 +39,22 @@ def recommend(message):
         return
     except Exception as e:
         print(e)
-    bot.reply_to(message, message.text)
+    bot.reply_to(message, 'Error')
+'''
+@bot.message_handler(func=lambda m: not m.text.startswith('/'), content_types=['text'])
+def recommend(message):
+    keyboard = types.InlineKeyboardMarkup()
+    callback_btn = types.InlineKeyboardButton(text="Нажми меня", callback_data="test")
+    keyboard.add(callback_btn)
+    try:
+        results, idx = search_idiom(message.text, return_index=True)
+        for i, res in zip(idx, results):
+            keyboard.add(types.InlineKeyboardButton(text=res[0].upper(), callback_data=str(i)))
+        bot.reply_to(message, construct_table(results), parse_mode='Markdown', reply_markup=keyboard)
+        return
+    except Exception as e:
+        print(e)
+    bot.reply_to(message, 'Error')
 
 
 @bot.inline_handler(func=lambda query: len(query.query) > 4)
@@ -51,7 +66,19 @@ def query_text(query):
                                                description=res[1].lower(),
                                                input_message_content=types.InputTextMessageContent(
                                                message_text=res[0].lower())))
-    bot.answer_inline_query(query.id, answers, cache_time=2147483646) # 68 лет 
+    bot.answer_inline_query(query.id, answers, cache_time=2147483646) # 68 лет
+
+
+@bot.callback_query_handler(func=lambda call: call.message)
+def callback_message(call):
+    print(call.data)
+    if call.data == "test":
+        try:
+            print(call.message.reply_markup)
+            bot.edit_message_text(chat_id=call.message.chat.id,
+                                  message_id=call.message.message_id, text="Пыщь")
+        except Exception as e:
+            print(e)
 
 
 @server.route('/' + TOKEN, methods=['POST'])

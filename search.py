@@ -28,8 +28,10 @@ def svdmap(prompt):
 
 
 @lru_cache(maxsize=100)
-def search_idiom(prompt, num=10):
+def search_idiom(prompt, num=10, return_index=False):
     idx, dist = UU.get_nns_by_vector(svdmap(prompt), num, include_distances=True)
+    if return_index:
+        return DB[idx], idx
     return DB[idx]
 
 
