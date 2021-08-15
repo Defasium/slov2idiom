@@ -69,8 +69,22 @@ def make_one_hash(elem, salt=SALT):
     return md5(''.join((str(elem), salt)).encode('utf-8')).hexdigest()
 
 
+@lru_cache(maxsize=100)
+def find_nn_by_hash(mdhash, num=6, return_index=False):
+    idx, dist = UU.get_nns_by_index(HASHMAP.get(mdhash, 0), num, include_distances=True)
+    if return_index:
+        return DB[idx], make_hash_with(idx, SALT)
+    return DB[idx]
+
+
 def construct_table(rows):
     result = []
     for i, row in enumerate(rows):
         result.append('%d. *%s* — %s\n'%(i+1, row[0].upper(), row[1]))
     return ''.join(result)
+
+
+def construct_idiom_info(row):
+	return 'Идиома\t*%s*\nЗначение\t%s'%(row[0].upper(), row[1])
+
+HASHMAP = {make_one_hash(i):i for i in range(DB.shape[0])}

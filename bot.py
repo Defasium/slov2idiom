@@ -13,7 +13,7 @@ Then, the bot is started and runs until we press Ctrl-C on the command line.
 import os
 import telebot
 from telebot import types
-from search import search_idiom, construct_table, make_one_hash
+from search import search_idiom, construct_table, construct_idiom_info, make_one_hash, find_nn_by_hash
 from flask import Flask, request
 
 TOKEN = os.environ.get('TG_TOKEN', '')
@@ -47,17 +47,22 @@ def update_history(keyboard):
     HISTORY[mdhash] = keyboard
     return 'H|'+mdhash
 
+
+def construct_keyboard(resutls, idx, undo=None):
+    keyboard = types.InlineKeyboardMarkup()
+    if undo is not None:
+        keyboard.add(types.InlineKeyboardButton(text="◀ Назад", callback_data=update_history(undo.to_json())))
+    for i, res in zip(idx, results):
+        keyboard.add(types.InlineKeyboardButton(text=res[0].upper(), callback_data=str(i)))
+    return keyboard
+        
+
 @bot.message_handler(func=lambda m: not m.text.startswith('/'), content_types=['text'])
 def recommend(message):
-    keyboard = types.InlineKeyboardMarkup()
-    callback_btn = types.InlineKeyboardButton(text="Нажми меня", callback_data="test")
-    keyboard.add(callback_btn)
-    keyboard.add(types.InlineKeyboardButton(text="Назад", callback_data=update_history(keyboard.to_json())))
     try:
         results, idx = search_idiom(message.text, return_index=True)
-        for i, res in zip(idx, results):
-            keyboard.add(types.InlineKeyboardButton(text=res[0].upper(), callback_data=str(i)))
-        bot.reply_to(message, construct_table(results), parse_mode='Markdown', reply_markup=keyboard)
+        bot.reply_to(message, construct_table(results), parse_mode='Markdown',
+                     reply_markup=construct_keyboard(resutls, idx))
         return
     except Exception as e:
         print(e)
@@ -73,7 +78,7 @@ def query_text(query):
                                                description=res[1].lower(),
                                                input_message_content=types.InputTextMessageContent(
                                                message_text=res[0].lower())))
-    bot.answer_inline_query(query.id, answers, cache_time=2147483646) # 68 лет
+    bot.answer_inline_query(query.id, answers, cache_time=2147483646) # 68 years
 
 
 @bot.callback_query_handler(func=lambda call: call.message)
@@ -88,18 +93,29 @@ def callback_message(call):
         except Exception as e:
             print(e)
     if call.data.startswith('H|'):
+        mdhash = call.data[2:]
         try:
-            if call.data[2:] in HISTORY:       
-                keyboard = types.InlineKeyboardMarkup.de_json(HISTORY[call.data[2:]])
+            if mdhash in HISTORY:       
+                keyboard = types.InlineKeyboardMarkup.de_json(HISTORY[mdhash])
                 bot.edit_message_text(chat_id=call.message.chat.id,
                                       reply_markup=keyboard,
-                                      message_id=call.message.message_id, text="Пыщь")
+                                      message_id=call.message.message_id,
+                                      text="Результаты поиска по запросу")
             else:
                 bot.edit_message_text(chat_id=call.message.chat.id,
-                                      message_id=call.message.message_id, text=call.message.text)
-                bot.send_message(chat_id=call.message.chat.id, text='Время истекло')
+                                      message_id=call.message.message_id,
+                                      text=call.message.text)
+                bot.send_message(chat_id=call.message.chat.id, text='Ошибка! Время истекло')
         except Exception as e:
             print(e)
+    else:
+        mdhash = call.data
+        results, idx = find_nn_by_hash(mdhash, return_index=True)
+        keyboard = construct_keyboard(results, idx, undo=call.message.reply_markup)
+        bot.edit_message_text(chat_id=call.message.chat.id,
+                              message_id=call.message.message_id,
+                              text=construct_idiom_info(results[0]),
+                              parse_mode='Markdown', reply_markup=keyboard)
 
 
 @server.route('/' + TOKEN, methods=['POST'])
