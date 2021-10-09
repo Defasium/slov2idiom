@@ -45,6 +45,8 @@ We tested accuracies of some pre-trained Russian BERT models on **STSb benchmark
 |:---:|:---:|:---:|:---:|:---:|:---:|
 |[cointegrate/rubert-tiny](https://huggingface.co/cointegrated/rubert-tiny)|12M|312|CLS|0.48472829|0.49825618|
 |[cointegrate/rubert-tiny](https://huggingface.co/cointegrated/rubert-tiny)|12M|312|MEAN|0.57088664|0.5875781|
+|[sberbank-ai/sbert_large_nlu_ru](https://huggingface.co/sberbank-ai/sbert_large_nlu_ru)|335M|1024|MEAN|0.5677551|0.5845757|
+|[sberbank-ai/ruRoberta-large](https://huggingface.co/sberbank-ai/ruRoberta-large)|355M|1024|MEAN|0.5847077|0.5958275|
 |[DeepPavlov/rubert-base-cased-sentence](https://huggingface.co/DeepPavlov/rubert-base-cased-sentence)|180M|768|CLS|0.6538959|0.66192624|
 |[DeepPavlov/rubert-base-cased-sentence](https://huggingface.co/DeepPavlov/rubert-base-cased-sentence)|180M|768|MEAN|0.6617157|0.6686508|
 |[sentence-transformers/LaBSE](https://huggingface.co/sentence-transformers/LaBSE)|470M|768|CLS|0.743942|0.7541933|
